@@ -37,12 +37,15 @@ body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 /* Tabs */
-.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.tabs{display:flex;gap:3px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding:0 12px;background:var(--ice);border-bottom:2px solid var(--accent)}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;min-width:60px;padding:10px 8px;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;scroll-snap-align:start}
+.tab{flex:0 0 auto;min-width:64px;padding:8px 10px 6px;background:var(--ice3);border:none;border-radius:8px 8px 0 0;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2}
+.tab.active{background:var(--ice2);color:var(--accent);border-bottom-color:var(--accent)}
+.tab:hover:not(.active){background:var(--ice2);color:var(--text)}
+@media(min-width:600px){.tab{flex:1;min-width:0}}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.cnt{display:inline-block;background:var(--ice3);border-radius:10px;padding:1px 6px;font-size:10px;margin-left:3px}
+
 
 /* Content */
 .content{padding:12px}
@@ -350,8 +353,8 @@ function render() {
     <div class="tabs">
         ${["ven","sam","dim","fin","classement"].map(t=>`
           <button class="tab ${tab===t?'active':''}" onclick="setTab('${t}')">
-            ${t==="ven"?"Vend.":t==="sam"?"Sam.":t==="dim"?"Dim.":t==="fin"?"Finales":"Classement"}
-            ${t!=="classement"?`<span class="cnt">${countDone(t)}</span>`:""}
+            <span>${t==="ven"?"Vend.":t==="sam"?"Sam.":t==="dim"?"Dim.":t==="fin"?"Finales":"Class."}</span>
+            ${t!=="classement"?`<span style="font-size:10px;font-weight:600;color:${tab===t?'var(--accent2)':'var(--surf)'};background:rgba(0,0,0,.3);border-radius:8px;padding:1px 5px">${countDone(t)}</span>`:`<span style="font-size:10px;color:transparent">-</span>`}
           </button>`).join("")}
       </div>
     </div>
