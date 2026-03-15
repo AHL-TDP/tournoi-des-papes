@@ -407,7 +407,8 @@ window.toggleAdmin = () => {
   else{showLogin=true;pwInput="";pwError="";render();setTimeout(()=>document.getElementById("pw-input")?.focus(),50);}
 };
 window.doLogin = () => {
-  if(pwInput===ADMIN_PW){isAdmin=true;showLogin=false;render();}
+  const val = document.getElementById('pw-input')?.value || pwInput;
+  if(val===ADMIN_PW){isAdmin=true;showLogin=false;pwInput="";render();}
   else{pwError="Mot de passe incorrect";render();}
 };
 window.closeLogin = () => { showLogin=false; render(); };
