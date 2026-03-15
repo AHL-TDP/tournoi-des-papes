@@ -351,7 +351,7 @@ function render() {
 
     <div class="tabs">
         ${["ven","sam","dim","fin","classement"].map(t=>`
-          <button class="tab ${tab===t?'active':''}" onclick="setTab('${t}')">
+          <button class="tab ${tab===t?'active':''}" data-tab="${t}" onclick="setTab('${t}')">
             <span style="font-size:13px;font-weight:800">${t==="ven"?"Vend.":t==="sam"?"Sam.":t==="dim"?"Dim.":t==="fin"?"Finales":"Class."}</span>
             <span style="font-size:10px;font-weight:600;background:rgba(0,0,0,.35);border-radius:8px;padding:1px 6px;color:${tab===t?'var(--accent2)':'var(--muted)'}">${t!=="classement"?countDone(t):"&nbsp;"}</span>
           </button>`).join("")}
@@ -476,19 +476,26 @@ if(isIOS && !isStandalone) {
   document.getElementById('ios-hint').style.display = 'block';
 }
 
-// Request fullscreen on first interaction (Android)
-let fsRequested = false;
-document.addEventListener('touchend', () => {
-  if(!fsRequested && document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().catch(()=>{});
-    fsRequested = true;
-  }
-}, {once: true});
+// Request fullscreen on first interaction (Android only, not iOS)
+const isAndroid = /android/i.test(navigator.userAgent);
+if(isAndroid) {
+  document.addEventListener('touchend', () => {
+    if(document.documentElement.requestFullscreen) {
+      document.documentElement.requestFullscreen().catch(()=>{});
+    }
+  }, {once: true, passive: true});
+}
 
 window.toggleContact = () => {
   const p = document.getElementById('contact-popup');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
 };
+// Event delegation for iOS compatibility
+document.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-tab]');
+  if(btn) { setTab(btn.dataset.tab); return; }
+});
+
 window.setTab = t => { tab=t; render(); scrollActiveTab(); };
 
 function scrollActiveTab() {
@@ -509,8 +516,8 @@ document.addEventListener('touchstart', e => {
 document.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
-  // Only horizontal swipe (dx > dy to avoid scroll conflict)
-  if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+  // Only trigger swipe if clearly horizontal and long enough
+  if(Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy) * 2.5) {
     const idx = TABS_ORDER.indexOf(tab);
     if(dx < 0 && idx < TABS_ORDER.length - 1) setTab(TABS_ORDER[idx+1]);
     else if(dx > 0 && idx > 0) setTab(TABS_ORDER[idx-1]);
