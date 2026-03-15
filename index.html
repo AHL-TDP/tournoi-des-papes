@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tournoi des Papes 2026 — Scores en direct</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ice:#0a1628;--ice2:#0d1e36;--ice3:#112244;
+  --accent:#00d4ff;--accent2:#0099cc;
+  --gold:#ffc840;--silver:#c0c8d8;--bronze:#cd7f32;
+  --green:#00e676;--red:#ff4444;
+  --text:#e8f0ff;--muted:#7a90b8;
+  --surf:#1a3a5c;
+}
+body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh}
+.app{max-width:720px;margin:0 auto;padding:0 0 60px}
+
+/* Header */
+.header{background:linear-gradient(135deg,var(--ice3),var(--ice2));border-bottom:2px solid var(--accent);padding:16px 16px 0;position:sticky;top:0;z-index:100}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.title span{color:var(--text)}
+.live-indicator{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green)}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
+.live-dot.offline{background:var(--red);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* Tabs */
+.tabs{display:flex;gap:2px}
+.tab{flex:1;padding:10px 4px;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.cnt{display:inline-block;background:var(--ice3);border-radius:10px;padding:1px 6px;font-size:10px;margin-left:3px}
+
+/* Content */
+.content{padding:12px}
+
+/* Match card */
+.match{display:grid;grid-template-columns:46px 54px 1fr 30px 30px 1fr;align-items:center;gap:5px;padding:8px 10px;background:var(--ice2);border-radius:8px;margin-bottom:4px;border:1px solid rgba(255,255,255,.04);transition:border-color .3s}
+.match:hover{border-color:rgba(0,212,255,.12)}
+.match.finished{opacity:.8}
+.match-num{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--muted);text-align:center}
+.match-time{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--accent);text-align:center}
+.match-time.after-surf{color:var(--gold)}
+.team{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase}
+.team.left{text-align:right}
+.team.right{text-align:left}
+.team.winner{color:var(--accent)}
+.score-box{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;background:var(--ice);border-radius:5px;padding:2px 0;line-height:1.2;color:var(--muted)}
+.score-box.has-score{color:var(--accent)}
+
+/* Surfacing / FIN */
+.surf-divider{display:flex;align-items:center;gap:8px;padding:5px 0;margin:3px 0}
+.surf-line{flex:1;height:1px;background:var(--surf)}
+.surf-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;color:var(--accent2);font-weight:700;letter-spacing:1px;white-space:nowrap;padding:3px 10px;background:rgba(0,153,204,.1);border-radius:10px;border:1px solid rgba(0,153,204,.2)}
+.fin-banner{background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.25);border-radius:6px;text-align:center;padding:6px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:800;color:var(--red);letter-spacing:2px;margin:6px 0 4px}
+
+/* Finals label */
+.final-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:800;letter-spacing:.5px;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+.final-label.finale{background:var(--gold);color:#000}
+.final-label.bronze{background:var(--bronze);color:#fff}
+.final-label.classif{background:var(--ice3);color:var(--muted);border:1px solid var(--surf)}
+
+/* Day header */
+.day-header{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:2px;padding:10px 0 6px;border-bottom:1px solid var(--surf);margin-bottom:8px}
+
+/* Standings */
+.standing-row{display:grid;grid-template-columns:28px 1fr repeat(4,40px);align-items:center;gap:4px;padding:8px 10px;border-radius:8px;margin-bottom:3px;background:var(--ice2);font-family:'Barlow Condensed',sans-serif;font-size:15px}
+.standing-row.header{background:var(--ice3);font-size:11px;color:var(--muted);font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 10px}
+.rank{font-weight:900;color:var(--muted);text-align:center}
+.rank.r1{color:var(--gold)}.rank.r2{color:var(--silver)}.rank.r3{color:var(--bronze)}
+.team-name-s{font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.stat{text-align:center;color:var(--muted)}.stat.pts{color:var(--accent);font-weight:800}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat-card{background:var(--ice2);border-radius:8px;padding:12px;border:1px solid rgba(255,255,255,.04);text-align:center}
+.stat-card-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--accent)}
+.stat-card-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="app" id="root">
+  <div style="text-align:center;padding:60px 20px;color:var(--muted);font-family:'Barlow Condensed',sans-serif">
+    Connexion à Firebase...
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-database.js";
+
+// ============================================================
+// 🔧 REMPLACE ICI PAR TA CONFIG FIREBASE (voir README.md)
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAd5eZUyU9O_-MPmMi9mR0QH4jhWkJUBeo",
+  authDomain: "tournoi-des-papes.firebaseapp.com",
+  databaseURL: "https://tournoi-des-papes-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "tournoi-des-papes",
+  storageBucket: "tournoi-des-papes.firebasestorage.app",
+  messagingSenderId: "805503696707",
+  appId: "1:805503696707:web:0ccf4773523572814cf9f6"
+};
+// ============================================================
+
+const ADMIN_PW = "Hockey2026"; // Change si tu veux
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const scoresRef = ref(db, "scores");
+
+const TEAMS = ["Trypo Tanus","Les Silures","Chock'84","Anonymos","Unknown","Les Oubliés","Les tarvos","nomade ice","Bros Star","Les Castors"];
+
+const SCHEDULE = [
+  // Vendredi
+  {id:1,h:"18h00",t1:"Trypo Tanus",t2:"Les Castors",as:false,day:"ven"},
+  {id:2,h:"18h30",t1:"Les Silures",t2:"Bros Star",as:false,day:"ven"},
+  {id:3,h:"19h00",t1:"Chock'84",t2:"nomade ice",as:false,day:"ven"},
+  {surf:"19h30",day:"ven"},
+  {id:4,h:"19h45",t1:"Anonymos",t2:"Les tarvos",as:true,day:"ven"},
+  {id:5,h:"20h15",t1:"Unknown",t2:"Les Oubliés",as:false,day:"ven"},
+  {id:6,h:"20h45",t1:"Trypo Tanus",t2:"Bros Star",as:false,day:"ven"},
+  {surf:"21h15",day:"ven"},
+  {id:7,h:"21h30",t1:"Les Castors",t2:"nomade ice",as:true,day:"ven"},
+  {id:8,h:"22h00",t1:"Les Silures",t2:"Les tarvos",as:false,day:"ven"},
+  {id:9,h:"22h30",t1:"Chock'84",t2:"Les Oubliés",as:false,day:"ven"},
+  {surf:"23h00",day:"ven"},
+  {id:10,h:"23h15",t1:"Anonymos",t2:"Unknown",as:true,day:"ven"},
+  {id:11,h:"23h45",t1:"Trypo Tanus",t2:"nomade ice",as:false,day:"ven"},
+  {fin:"00h15",day:"ven"},
+  // Samedi
+  {id:12,h:"07h00",t1:"Bros Star",t2:"Les tarvos",as:false,day:"sam"},
+  {id:13,h:"07h30",t1:"Les Castors",t2:"Les Oubliés",as:false,day:"sam"},
+  {id:14,h:"08h00",t1:"Les Silures",t2:"Unknown",as:false,day:"sam"},
+  {surf:"08h30",day:"sam"},
+  {id:15,h:"08h45",t1:"Chock'84",t2:"Anonymos",as:true,day:"sam"},
+  {id:16,h:"09h15",t1:"Trypo Tanus",t2:"Les tarvos",as:false,day:"sam"},
+  {id:17,h:"09h45",t1:"nomade ice",t2:"Les Oubliés",as:false,day:"sam"},
+  {surf:"10h15",day:"sam"},
+  {id:18,h:"10h30",t1:"Bros Star",t2:"Unknown",as:true,day:"sam"},
+  {id:19,h:"11h00",t1:"Les Castors",t2:"Anonymos",as:false,day:"sam"},
+  {id:20,h:"11h30",t1:"Les Silures",t2:"Chock'84",as:false,day:"sam"},
+  {surf:"12h00",day:"sam"},
+  {id:21,h:"12h15",t1:"Trypo Tanus",t2:"Les Oubliés",as:true,day:"sam"},
+  {id:22,h:"12h45",t1:"Les tarvos",t2:"Unknown",as:false,day:"sam"},
+  {id:23,h:"13h15",t1:"nomade ice",t2:"Anonymos",as:false,day:"sam"},
+  {surf:"13h45",day:"sam"},
+  {id:24,h:"14h00",t1:"Bros Star",t2:"Chock'84",as:true,day:"sam"},
+  {id:25,h:"14h30",t1:"Les Castors",t2:"Les Silures",as:false,day:"sam"},
+  {id:26,h:"15h00",t1:"Trypo Tanus",t2:"Unknown",as:false,day:"sam"},
+  {surf:"15h30",day:"sam"},
+  {id:27,h:"15h45",t1:"Les Oubliés",t2:"Anonymos",as:true,day:"sam"},
+  {id:28,h:"16h15",t1:"Les tarvos",t2:"Chock'84",as:false,day:"sam"},
+  {id:29,h:"16h45",t1:"nomade ice",t2:"Les Silures",as:false,day:"sam"},
+  {surf:"17h15",day:"sam"},
+  {id:30,h:"17h30",t1:"Bros Star",t2:"Les Castors",as:true,day:"sam"},
+  {id:31,h:"18h00",t1:"Trypo Tanus",t2:"Anonymos",as:false,day:"sam"},
+  {id:32,h:"18h30",t1:"Unknown",t2:"Chock'84",as:false,day:"sam"},
+  {surf:"19h00",day:"sam"},
+  {id:33,h:"19h15",t1:"Les Oubliés",t2:"Les Silures",as:true,day:"sam"},
+  {id:34,h:"19h45",t1:"Les tarvos",t2:"Les Castors",as:false,day:"sam"},
+  {id:35,h:"20h15",t1:"nomade ice",t2:"Bros Star",as:false,day:"sam"},
+  {surf:"20h45",day:"sam"},
+  {id:36,h:"21h00",t1:"Trypo Tanus",t2:"Chock'84",as:true,day:"sam"},
+  {id:37,h:"21h30",t1:"Anonymos",t2:"Les Silures",as:false,day:"sam"},
+  {id:38,h:"22h00",t1:"Unknown",t2:"Les Castors",as:false,day:"sam"},
+  {surf:"22h30",day:"sam"},
+  {id:39,h:"22h45",t1:"Les Oubliés",t2:"Bros Star",as:true,day:"sam"},
+  {id:40,h:"23h15",t1:"Les tarvos",t2:"nomade ice",as:false,day:"sam"},
+  {id:41,h:"23h45",t1:"Trypo Tanus",t2:"Les Silures",as:false,day:"sam"},
+  {fin:"00h15",day:"sam"},
+  // Dimanche qualif
+  {id:42,h:"07h00",t1:"Chock'84",t2:"Les Castors",as:false,day:"dim"},
+  {id:43,h:"07h30",t1:"Anonymos",t2:"Bros Star",as:false,day:"dim"},
+  {id:44,h:"08h00",t1:"Unknown",t2:"nomade ice",as:false,day:"dim"},
+  {surf:"08h30",day:"dim"},
+  {id:45,h:"08h45",t1:"Les Oubliés",t2:"Les tarvos",as:true,day:"dim"},
+  {fin:"09h15",day:"dim"},
+  // Finales
+  {surf:"09h15",day:"fin"},
+  {id:101,h:"09h30",t1:"?",t2:"?",as:true,day:"fin",label:"9e/10e"},
+  {id:102,h:"10h12",t1:"?",t2:"?",as:false,day:"fin",label:"7e/8e"},
+  {surf:"10h54",day:"fin"},
+  {id:103,h:"11h09",t1:"?",t2:"?",as:true,day:"fin",label:"5e/6e"},
+  {id:104,h:"11h51",t1:"?",t2:"?",as:false,day:"fin",label:"3e place"},
+  {surf:"12h33",day:"fin"},
+  {id:105,h:"12h48",t1:"?",t2:"?",as:true,day:"fin",label:"FINALE"},
+  {fin:"13h30",day:"fin"},
+];
+
+let scores = {};
+let tab = "ven";
+let isAdmin = false;
+let showLogin = false;
+let pwInput = "";
+let pwError = "";
+let isOnline = false;
+
+// Init empty scores
+SCHEDULE.forEach(m => { if(m.id) scores[m.id] = {s1:null,s2:null}; });
+
+// Listen to Firebase in real-time
+onValue(scoresRef, snap => {
+  isOnline = true;
+  const data = snap.val();
+  if(data) {
+    Object.keys(data).forEach(k => {
+      if(scores[k] !== undefined) scores[k] = data[k];
+    });
+  }
+  render();
+}, err => {
+  isOnline = false;
+  render();
+});
+
+function saveScore(id) {
+  set(ref(db, `scores/${id}`), scores[id]);
+}
+
+function getStandings() {
+  const st = {};
+  TEAMS.forEach(t => st[t]={pts:0,w:0,d:0,l:0,gf:0,ga:0,mp:0});
+  SCHEDULE.forEach(m => {
+    if(!m.id || m.day==="fin") return;
+    const sc = scores[m.id];
+    if(sc && sc.s1!==null && sc.s2!==null) {
+      st[m.t1].mp++; st[m.t2].mp++;
+      st[m.t1].gf+=sc.s1; st[m.t1].ga+=sc.s2;
+      st[m.t2].gf+=sc.s2; st[m.t2].ga+=sc.s1;
+      if(sc.s1>sc.s2){st[m.t1].w++;st[m.t1].pts+=3;st[m.t2].l++;}
+      else if(sc.s1<sc.s2){st[m.t2].w++;st[m.t2].pts+=3;st[m.t1].l++;}
+      else{st[m.t1].d++;st[m.t1].pts++;st[m.t2].d++;st[m.t2].pts++;}
+    }
+  });
+  return TEAMS.map(t=>({team:t,...st[t]}))
+    .sort((a,b)=>b.pts-a.pts||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf);
+}
+
+function getFinalists() {
+  const s = getStandings();
+  return {
+    101:{t1:s[9]?.team||"10e",t2:s[8]?.team||"9e"},
+    102:{t1:s[7]?.team||"8e",t2:s[6]?.team||"7e"},
+    103:{t1:s[5]?.team||"6e",t2:s[4]?.team||"5e"},
+    104:{t1:s[3]?.team||"4e",t2:s[2]?.team||"3e"},
+    105:{t1:s[1]?.team||"2e",t2:s[0]?.team||"1er"},
+  };
+}
+
+function countDone(day) {
+  let done=0,total=0;
+  SCHEDULE.forEach(m => {
+    if(!m.id||m.day!==day) return;
+    total++;
+    const sc=scores[m.id];
+    if(sc&&sc.s1!==null) done++;
+  });
+  return `${done}/${total}`;
+}
+
+function render() {
+  const standings = getStandings();
+  const finalists = getFinalists();
+  const totalDone = Object.values(scores).filter(s=>s.s1!==null).length;
+
+  document.getElementById("root").innerHTML = `
+    ${showLogin ? renderLogin() : ""}
+    <div class="header">
+      <div class="header-top">
+        <div class="title">🏒 <span>Tournoi</span> des Papes 2026</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="live-indicator">
+            <div class="live-dot ${isOnline?'':'offline'}"></div>
+            ${isOnline?'En direct':'Hors ligne'}
+          </div>
+          <button onclick="toggleAdmin()" style="background:none;border:1px solid ${isAdmin?'var(--gold)':'var(--muted)'};color:${isAdmin?'var(--gold)':'var(--muted)'};padding:5px 10px;border-radius:6px;cursor:pointer;font-size:12px;font-family:Barlow,sans-serif;transition:all .2s">
+            ${isAdmin?'🔓 Admin':'🔐 Admin'}
+          </button>
+        </div>
+      </div>
+      <div class="tabs">
+        ${["ven","sam","dim","fin","classement"].map(t=>`
+          <button class="tab ${tab===t?'active':''}" onclick="setTab('${t}')">
+            ${t==="ven"?"Vend.":t==="sam"?"Sam.":t==="dim"?"Dim.":t==="fin"?"Finales":"Classement"}
+            ${t!=="classement"?`<span class="cnt">${countDone(t)}</span>`:""}
+          </button>`).join("")}
+      </div>
+    </div>
+    <div class="content">
+      ${tab==="classement" ? renderStandings(standings,totalDone) : renderDay(finalists)}
+    </div>`;
+}
+
+function renderDay(finalists) {
+  const items = SCHEDULE.filter(m=>m.day===tab);
+  const labels = {ven:"Vendredi 17/04/2026",sam:"Samedi 18/04/2026",dim:"Dimanche 19/04/2026 — Qualifications",fin:"Dimanche 19/04/2026 — Finales · 2×20 min"};
+  let html = `<div class="day-header">${labels[tab]}</div>`;
+
+  items.forEach(m => {
+    if(m.surf!==undefined) {
+      html+=`<div class="surf-divider"><div class="surf-line"></div><div class="surf-label">❄ Surfaçage — ${m.surf}</div><div class="surf-line"></div></div>`;
+      return;
+    }
+    if(m.fin!==undefined) {
+      html+=`<div class="fin-banner">Fin · ${m.fin}</div>`;
+      return;
+    }
+
+    const t1 = tab==="fin"?(finalists[m.id]?.t1||m.t1):m.t1;
+    const t2 = tab==="fin"?(finalists[m.id]?.t2||m.t2):m.t2;
+    const sc = scores[m.id]||{s1:null,s2:null};
+    const done = sc.s1!==null && sc.s2!==null;
+    const w1 = done&&sc.s1>sc.s2, w2 = done&&sc.s2>sc.s1;
+    const num = m.id>100?m.id-100:m.id;
+
+    let lbl="";
+    if(m.label){
+      if(m.label==="FINALE") lbl=`<span class="final-label finale">Finale</span>`;
+      else if(m.label==="3e place") lbl=`<span class="final-label bronze">3e place</span>`;
+      else lbl=`<span class="final-label classif">${m.label}</span>`;
+    }
+
+    if(isAdmin){
+      html+=`<div class="match ${done?'finished':''}">
+        <div class="match-num">#${num}</div>
+        <div class="match-time ${m.as?'after-surf':''}">${m.h}</div>
+        <div class="team left ${w1?'winner':''}">${t1}</div>
+        <input style="width:36px;background:var(--ice3);border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-align:center;padding:2px 0;outline:none"
+          type="number" min="0" max="99" value="${sc.s1!==null?sc.s1:''}" placeholder="–"
+          onchange="updateScore(${m.id},'s1',this.value)">
+        <input style="width:36px;background:var(--ice3);border:1px solid var(--accent);border-radius:4px;color:var(--accent);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-align:center;padding:2px 0;outline:none"
+          type="number" min="0" max="99" value="${sc.s2!==null?sc.s2:''}" placeholder="–"
+          onchange="updateScore(${m.id},'s2',this.value)">
+        <div class="team right ${w2?'winner':''}">${t2}</div>
+        ${lbl}
+      </div>`;
+    } else {
+      html+=`<div class="match ${done?'finished':''}">
+        <div class="match-num">#${num}</div>
+        <div class="match-time ${m.as?'after-surf':''}">${m.h}</div>
+        <div class="team left ${w1?'winner':''}">${t1}</div>
+        <div class="score-box ${done?'has-score':''}">${sc.s1!==null?sc.s1:"–"}</div>
+        <div class="score-box ${done?'has-score':''}">${sc.s2!==null?sc.s2:"–"}</div>
+        <div class="team right ${w2?'winner':''}">${t2}</div>
+        ${lbl}
+      </div>`;
+    }
+  });
+  return html;
+}
+
+function renderStandings(standings,totalDone) {
+  const medals=["r1","r2","r3"];
+  return `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card-val">${totalDone}</div><div class="stat-card-lbl">Matchs joués</div></div>
+      <div class="stat-card"><div class="stat-card-val">${50-totalDone}</div><div class="stat-card-lbl">Restants</div></div>
+      <div class="stat-card"><div class="stat-card-val">${standings[0]?.team||"–"}</div><div class="stat-card-lbl">Leader actuel</div></div>
+    </div>
+    <div class="standing-row header">
+      <div>#</div><div>Équipe</div>
+      <div class="stat">MJ</div><div class="stat">V</div>
+      <div class="stat pts">Pts</div><div class="stat">GD</div>
+    </div>
+    ${standings.map((s,i)=>`
+      <div class="standing-row">
+        <div class="rank ${medals[i]||''}">${i+1}</div>
+        <div class="team-name-s">${s.team}</div>
+        <div class="stat">${s.mp}</div>
+        <div class="stat">${s.w}</div>
+        <div class="stat pts">${s.pts}</div>
+        <div class="stat">${s.gf-s.ga>=0?'+':''}${s.gf-s.ga}</div>
+      </div>`).join("")}
+    <div style="text-align:center;padding:14px 0 4px;font-size:11px;color:var(--muted)">
+      V=3pts · N=1pt · D=0pt · GD=différence buts
+    </div>`;
+}
+
+function renderLogin() {
+  return `<div style="position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:200" onclick="if(event.target===this)closeLogin()">
+    <div style="background:var(--ice3);border:1px solid var(--accent);border-radius:12px;padding:24px;min-width:280px;text-align:center">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:var(--accent);margin-bottom:16px;text-transform:uppercase;letter-spacing:1px">🔐 Accès Admin</div>
+      ${pwError?`<div style="color:var(--red);font-size:12px;margin-bottom:8px">${pwError}</div>`:""}
+      <input type="password" id="pw-input" value="${pwInput}" placeholder="Mot de passe"
+        style="width:100%;background:var(--ice2);border:1px solid var(--muted);border-radius:6px;color:var(--text);padding:10px 12px;font-size:14px;margin-bottom:12px;outline:none;font-family:Barlow,sans-serif"
+        oninput="pwInput=this.value"
+        onkeydown="if(event.key==='Enter')doLogin()">
+      <div style="display:flex;gap:8px">
+        <button onclick="closeLogin()" style="flex:1;padding:10px;border:1px solid var(--surf);border-radius:6px;background:var(--ice);color:var(--muted);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase">Annuler</button>
+        <button onclick="doLogin()" style="flex:1;padding:10px;border:none;border-radius:6px;background:var(--accent);color:#000;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase">Entrer</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// Global handlers
+window.setTab = t => { tab=t; render(); };
+window.toggleAdmin = () => {
+  if(isAdmin){isAdmin=false;render();}
+  else{showLogin=true;pwInput="";pwError="";render();setTimeout(()=>document.getElementById("pw-input")?.focus(),50);}
+};
+window.doLogin = () => {
+  if(pwInput===ADMIN_PW){isAdmin=true;showLogin=false;render();}
+  else{pwError="Mot de passe incorrect";render();}
+};
+window.closeLogin = () => { showLogin=false; render(); };
+window.updateScore = (id, field, val) => {
+  const n = val===""?null:parseInt(val);
+  if(!scores[id]) scores[id]={s1:null,s2:null};
+  scores[id][field] = isNaN(n)?null:n;
+  if(scores[id].s1!==null && scores[id].s2!==null) saveScore(id);
+  render();
+};
+</script>
+</body>
+</html>
