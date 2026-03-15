@@ -328,7 +328,7 @@ function renderDay(finalists) {
     }
 
     if(isAdmin){
-      html+=`<div class="match ${done?'finished':''}">
+      html+=`<div class="match ${done?'finished':''}" style="grid-template-columns:46px 54px 1fr 30px 30px 1fr 22px">
         <div class="match-num">#${num}</div>
         <div class="match-time ${m.as?'after-surf':''}">${m.h}</div>
         <div class="team left ${w1?'winner':''}">${t1}</div>
@@ -339,6 +339,7 @@ function renderDay(finalists) {
           type="number" min="0" max="99" value="${sc.s2!==null?sc.s2:''}" placeholder="–"
           onchange="updateScore(${m.id},'s2',this.value)">
         <div class="team right ${w2?'winner':''}">${t2}</div>
+        <button onclick="clearScore(${m.id})" title="Effacer le score" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0;opacity:${done?'1':'0.3'}">${done?'✕':'○'}</button>
         ${lbl}
       </div>`;
     } else {
@@ -412,6 +413,11 @@ window.doLogin = () => {
   else{pwError="Mot de passe incorrect";render();}
 };
 window.closeLogin = () => { showLogin=false; render(); };
+window.clearScore = (id) => {
+  scores[id] = {s1:null, s2:null};
+  set(ref(db, `scores/${id}`), {s1:null, s2:null});
+  render();
+};
 window.updateScore = (id, field, val) => {
   const n = val===""?null:parseInt(val);
   if(!scores[id]) scores[id]={s1:null,s2:null};
