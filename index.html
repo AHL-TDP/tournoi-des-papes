@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}button,a{touch-action:manipulation;cursor:pointer}
 :root{
   --ice:#0a1628;--ice2:#0d1e36;--ice3:#112244;
   --accent:#00d4ff;--accent2:#0099cc;
@@ -23,11 +23,11 @@
   --text:#e8f0ff;--muted:#7a90b8;
   --surf:#1a3a5c;
 }
-body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh}
+body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .app{max-width:720px;margin:0 auto;padding:0 0 60px}
 
 /* Header */
-.header{background:linear-gradient(135deg,var(--ice3),var(--ice2));border-bottom:2px solid var(--accent);padding:16px 16px 0;position:sticky;top:0;z-index:100}
+.header{background:linear-gradient(135deg,var(--ice3),var(--ice2));border-bottom:2px solid var(--accent);padding:16px 16px 0;position:sticky;top:0;z-index:100;-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-overflow-scrolling:auto}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
 .title span{color:var(--text)}
