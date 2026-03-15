@@ -2,7 +2,14 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tournoi des Papes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a1628">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.png">
 <title>Tournoi des Papes 2026 — Scores en direct</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -32,7 +39,7 @@ body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min
 /* Tabs */
 .tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex:0 0 auto;min-width:80px;padding:10px 12px;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;scroll-snap-align:start}
+.tab{flex:0 0 auto;min-width:60px;padding:10px 8px;background:none;border:none;color:var(--muted);font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;scroll-snap-align:start}
 .tab:hover{color:var(--text)}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
 .cnt{display:inline-block;background:var(--ice3);border-radius:10px;padding:1px 6px;font-size:10px;margin-left:3px}
@@ -348,6 +355,9 @@ function render() {
           </button>`).join("")}
       </div>
     </div>
+    <div id="ios-hint" style="display:none;text-align:center;padding:4px 12px;font-size:10px;color:var(--muted);background:rgba(0,0,0,.2)">
+      iPhone : Partager ↑ → "Sur l'écran d'accueil" pour le plein écran
+    </div>
     <div class="content">
       ${tab==="classement" ? renderStandings(standings,totalDone) : renderDay(finalists)}
     </div>`;
@@ -457,11 +467,53 @@ function renderLogin() {
 }
 
 // Global handlers
+// Show iOS hint only on iPhone/iPad Safari
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone;
+if(isIOS && !isStandalone) {
+  document.getElementById('ios-hint').style.display = 'block';
+}
+
+// Request fullscreen on first interaction (Android)
+let fsRequested = false;
+document.addEventListener('touchend', () => {
+  if(!fsRequested && document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    fsRequested = true;
+  }
+}, {once: true});
+
 window.toggleContact = () => {
   const p = document.getElementById('contact-popup');
   p.style.display = p.style.display === 'none' ? 'block' : 'none';
 };
-window.setTab = t => { tab=t; render(); };
+window.setTab = t => { tab=t; render(); scrollActiveTab(); };
+
+function scrollActiveTab() {
+  setTimeout(() => {
+    const activeTab = document.querySelector('.tab.active');
+    if(activeTab) activeTab.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  }, 50);
+}
+
+// Swipe support
+const TABS_ORDER = ["ven","sam","dim","fin","classement"];
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  // Only horizontal swipe (dx > dy to avoid scroll conflict)
+  if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    const idx = TABS_ORDER.indexOf(tab);
+    if(dx < 0 && idx < TABS_ORDER.length - 1) setTab(TABS_ORDER[idx+1]);
+    else if(dx > 0 && idx > 0) setTab(TABS_ORDER[idx-1]);
+  }
+}, {passive:true});
 window.toggleAdmin = () => {
   if(isAdmin){isAdmin=false;render();updateHeaderState();}
   else{showLogin=true;pwInput="";pwError="";render();setTimeout(()=>document.getElementById("pw-input")?.focus(),50);}
