@@ -24,10 +24,10 @@
   --surf:#1a3a5c;
 }
 body{background:var(--ice);color:var(--text);font-family:'Barlow',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-.app{max-width:720px;margin:0 auto;padding:0 0 60px}
+.app{max-width:720px;margin:0 auto;padding:0 0 60px}.app-content{padding-top:var(--header-h,180px)}
 
 /* Header */
-.header{background:linear-gradient(135deg,var(--ice3),var(--ice2));border-bottom:2px solid var(--accent);padding:16px 16px 0;position:sticky;top:0;z-index:100;-webkit-transform:translateZ(0);transform:translateZ(0);-webkit-overflow-scrolling:auto}
+.header{background:linear-gradient(135deg,var(--ice3),var(--ice2));border-bottom:2px solid var(--accent);padding:16px 16px 0;position:fixed;top:0;left:0;right:0;z-index:100;-webkit-transform:translate3d(0,0,0);transform:translate3d(0,0,0)}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
 .title span{color:var(--text)}
@@ -357,11 +357,11 @@ function render() {
           </button>`).join("")}
       </div>
     </div>
-    <div style="text-align:right;padding:2px 12px 0;font-size:9px;color:rgba(122,144,184,.35);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">v1.8</div>
+    <div style="text-align:right;padding:2px 12px 0;font-size:9px;color:rgba(122,144,184,.35);font-family:'Barlow Condensed',sans-serif;letter-spacing:.5px">v1.9</div>
     <div id="ios-hint" style="display:none;text-align:center;padding:4px 12px;font-size:10px;color:var(--muted);background:rgba(0,0,0,.2)">
       iPhone : Partager ↑ → "Sur l'écran d'accueil" pour le plein écran
     </div>
-    <div class="content">
+    <div class="app-content"><div class="content">
       ${tab==="classement" ? renderStandings(standings,totalDone) : renderDay(finalists)}
     </div>`;
 }
@@ -486,6 +486,16 @@ if(isAndroid) {
     }
   }, {once: true, passive: true});
 }
+
+// Adjust content padding to match real header height
+function adjustPadding() {
+  const h = document.querySelector('.header');
+  const app = document.querySelector('.app-content');
+  if(h && app) app.style.paddingTop = h.offsetHeight + 'px';
+}
+window.addEventListener('resize', adjustPadding);
+const origRender = render;
+window.render = function() { origRender(); setTimeout(adjustPadding, 50); };
 
 window.toggleContact = () => {
   const p = document.getElementById('contact-popup');
